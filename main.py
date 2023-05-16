@@ -84,12 +84,14 @@ model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
 # Compile the model
 model.compile(optimizer=keras.optimizers.Adam(), loss="binary_crossentropy", metrics=["accuracy"])
-
+print("fitting")
 # Fit the model to the data
-fitted = model.fit(
+model.fit(
     x=X_train,
     y=y_train,
     epochs=NUMBER_OF_EPOCHS,
     validation_data=(X_val, y_val),
 )
+predictions = model.predict(X_val)
+print()
 # %%
