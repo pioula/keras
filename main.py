@@ -93,5 +93,5 @@ model.fit(
     validation_data=(X_val, y_val),
 )
 predictions = model.predict(X_val)
-print()
+print(predictions)
 # %%
