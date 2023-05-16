@@ -13,7 +13,7 @@ NUMBER_OF_EPOCHS = args.ep
 base_path = args.path
 #%% 
 import pandas as pd
-df = pd.read_csv(f'{base_path}/train/train.csv')
+df = pd.read_csv(f'{base_path}BigDataCup2022/S1/train/train.csv')
 df.head()
 
 #%%
@@ -31,8 +31,8 @@ images = np.zeros((NUMBER_OF_IMAGES * 2, 2, 512, 512, 3), dtype=np.uint8)
 # Write a for which will loop over first 100 images and save them into a numpy array
 for i in range(NUMBER_OF_IMAGES):
     # Read the image
-    img = cv2.imread(df.iloc[i,1])
-    encoded = cv2.imread(df.iloc[i,2])
+    img = cv2.imread(f'{base_path}{df.iloc[i,1]}')
+    encoded = cv2.imread(f'{base_path}{df.iloc[i,2]}')
     # Save the image into the numpy array
     images[i][0] = img
     images[i][1] = encoded
