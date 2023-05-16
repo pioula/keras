@@ -64,13 +64,13 @@ from tensorflow import keras
 from keras import layers
 
 # Define the ResNet152 model
-base_model = keras.applications.EfficientNetB0(
-    weights=None,  # Load weights pre-trained on ImageNet.
-    input_shape=(512, 512, 3),
-    include_top=False,
-) 
+# base_model = keras.applications.EfficientNetB0(
+#     weights=None,  # Load weights pre-trained on ImageNet.
+#     input_shape=(512, 512, 3),
+#     include_top=False,
+# ) 
 model = tf.keras.Sequential()
-model.add(keras.applications.ResNet152(include_top=False, weights=None, input_shape=(512, 512, 3)))
+model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 3)))
 model.add(tf.keras.layers.GlobalAveragePooling2D())
 model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
