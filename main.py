@@ -50,8 +50,7 @@ for i in range(NUMBER_OF_IMAGES):
 #%% labels
 labels = np.array([1] * NUMBER_OF_IMAGES + [0] * NUMBER_OF_IMAGES)
 #%% six channels
-# X = np.array([cv2.merge((img[0][:,:,0], img[0][:,:,1], img[0][:,:,2], img[1][:,:,0], img[1][:,:,1], img[1][:,:,2])) for img in images], dtype=float)
-X = np.array([cv2.merge((img[0][:,:,0], img[0][:,:,1], img[0][:,:,2])) for img in images], dtype=float)
+X = np.array([cv2.merge((img[0][:,:,0], img[0][:,:,1], img[0][:,:,2], img[1][:,:,0], img[1][:,:,1], img[1][:,:,2])) for img in images], dtype=float)
 X /= 255.
 #%% Train validation  split
 from sklearn.model_selection import train_test_split
@@ -62,26 +61,11 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 
-# Define the ResNet152 model
-# base_model = keras.applications.EfficientNetB0(
-#     weights=None,  # Load weights pre-trained on ImageNet.
-#     input_shape=(512, 512, 3),
-#     include_top=False,
-# ) 
 with tf.device('/device:GPU:0'):
     model = tf.keras.Sequential()
-    model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 3)))
+    model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 6)))
     model.add(tf.keras.layers.GlobalAveragePooling2D())
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
-
-    # # Data augmentation
-    # data_augmentation = tf.keras.Sequential(
-    #     [
-    #         layers.RandomFlip("horizontal_and_vertical"),
-    #         layers.RandomRotation(0.2),
-    #         layers.RandomZoom(0.2),
-    #     ]
-    # )
 
     # Compile the model
     model.compile(optimizer=keras.optimizers.Adam(), loss="binary_crossentropy", metrics=["accuracy"])
@@ -94,6 +78,22 @@ with tf.device('/device:GPU:0'):
         validation_data=(X_val, y_val),
         batch_size=2
     )
+
     predictions = model.predict(X_val)
     print(predictions)
+
+    # round predictions
+    predictions = np.round(predictions)
+
+    accuracy = tf.keras.metrics.Accuracy()
+    print(accuracy(predictions, y_val))
 # %%
+
+    # # Data augmentation
+    # data_augmentation = tf.keras.Sequential(
+    #     [
+    #         layers.RandomFlip("horizontal_and_vertical"),
+    #         layers.RandomRotation(0.2),
+    #         layers.RandomZoom(0.2),
+    #     ]
+    # )
