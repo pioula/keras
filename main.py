@@ -63,7 +63,7 @@ from tensorflow import keras
 from keras import layers
 
 # Define the ResNet152 model
-base_model = keras.applications.ResNet152(
+base_model = keras.applications.EfficientNetB0(
     weights=None,  # Load weights pre-trained on ImageNet.
     input_shape=(512, 512, 6),
     include_top=False,
