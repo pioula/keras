@@ -91,6 +91,7 @@ model.fit(
     y=y_train,
     epochs=NUMBER_OF_EPOCHS,
     validation_data=(X_val, y_val),
+    batch_size=2
 )
 predictions = model.predict(X_val)
 print(predictions)
