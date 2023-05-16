@@ -23,7 +23,6 @@ df.head()
 import numpy as np
 import os
 import cv2
-
 NUMBER_OF_IMAGES = NUMBER_OF_IMAGES
 
 images = np.zeros((NUMBER_OF_IMAGES * 2, 2, 512, 512, 3), dtype=np.uint8)
@@ -69,31 +68,32 @@ from keras import layers
 #     input_shape=(512, 512, 3),
 #     include_top=False,
 # ) 
-model = tf.keras.Sequential()
-model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 3)))
-model.add(tf.keras.layers.GlobalAveragePooling2D())
-model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+with tf.device('/device:GPU:0'):
+    model = tf.keras.Sequential()
+    model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 3)))
+    model.add(tf.keras.layers.GlobalAveragePooling2D())
+    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
-# # Data augmentation
-# data_augmentation = tf.keras.Sequential(
-#     [
-#         layers.RandomFlip("horizontal_and_vertical"),
-#         layers.RandomRotation(0.2),
-#         layers.RandomZoom(0.2),
-#     ]
-# )
+    # # Data augmentation
+    # data_augmentation = tf.keras.Sequential(
+    #     [
+    #         layers.RandomFlip("horizontal_and_vertical"),
+    #         layers.RandomRotation(0.2),
+    #         layers.RandomZoom(0.2),
+    #     ]
+    # )
 
-# Compile the model
-model.compile(optimizer=keras.optimizers.Adam(), loss="binary_crossentropy", metrics=["accuracy"])
-print("fitting")
-# Fit the model to the data
-model.fit(
-    x=X_train,
-    y=y_train,
-    epochs=NUMBER_OF_EPOCHS,
-    validation_data=(X_val, y_val),
-    batch_size=2
-)
-predictions = model.predict(X_val)
-print(predictions)
+    # Compile the model
+    model.compile(optimizer=keras.optimizers.Adam(), loss="binary_crossentropy", metrics=["accuracy"])
+    print("fitting")
+    # Fit the model to the data
+    model.fit(
+        x=X_train,
+        y=y_train,
+        epochs=NUMBER_OF_EPOCHS,
+        validation_data=(X_val, y_val),
+        batch_size=2
+    )
+    predictions = model.predict(X_val)
+    print(predictions)
 # %%
