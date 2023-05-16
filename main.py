@@ -51,7 +51,8 @@ for i in range(NUMBER_OF_IMAGES):
 #%% labels
 labels = np.array([1] * NUMBER_OF_IMAGES + [0] * NUMBER_OF_IMAGES)
 #%% six channels
-X = np.array([cv2.merge((img[0][:,:,0], img[0][:,:,1], img[0][:,:,2], img[1][:,:,0], img[1][:,:,1], img[1][:,:,2])) for img in images], dtype=float)
+# X = np.array([cv2.merge((img[0][:,:,0], img[0][:,:,1], img[0][:,:,2], img[1][:,:,0], img[1][:,:,1], img[1][:,:,2])) for img in images], dtype=float)
+X = np.array([cv2.merge((img[0][:,:,0], img[0][:,:,1], img[0][:,:,2])) for img in images], dtype=float)
 X /= 255.
 #%% Train validation  split
 from sklearn.model_selection import train_test_split
@@ -65,11 +66,11 @@ from keras import layers
 # Define the ResNet152 model
 base_model = keras.applications.EfficientNetB0(
     weights=None,  # Load weights pre-trained on ImageNet.
-    input_shape=(512, 512, 6),
+    input_shape=(512, 512, 3),
     include_top=False,
 ) 
 model = tf.keras.Sequential()
-model.add(keras.applications.ResNet152(include_top=False, weights=None, input_shape=(512, 512, 6)))
+model.add(keras.applications.ResNet152(include_top=False, weights=None, input_shape=(512, 512, 3)))
 model.add(tf.keras.layers.GlobalAveragePooling2D())
 model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
