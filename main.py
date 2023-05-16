@@ -1,6 +1,19 @@
+#%%
+import argparse
+
+parser = argparse.ArgumentParser(description='Example of command line arguments')
+parser.add_argument('--path', type=str, help='an argument')
+parser.add_argument('--img', type=int, help='an argument')
+parser.add_argument('--ep', type=int, help='an argument')
+args = parser.parse_args()
+
+NUMBER_OF_IMAGES = args.img
+NUMBER_OF_EPOCHS = args.ep
+
+base_path = args.path
 #%% 
 import pandas as pd
-df = pd.read_csv('./BigDataCup2022/S1/train/train.csv')
+df = pd.read_csv(f'{base_path}/train/train.csv')
 df.head()
 
 #%%
@@ -11,7 +24,7 @@ import numpy as np
 import os
 import cv2
 
-NUMBER_OF_IMAGES = 100
+NUMBER_OF_IMAGES = NUMBER_OF_IMAGES
 
 images = np.zeros((NUMBER_OF_IMAGES * 2, 2, 512, 512, 3), dtype=np.uint8)
 
@@ -76,7 +89,7 @@ model.compile(optimizer=keras.optimizers.Adam(), loss="binary_crossentropy", met
 fitted = model.fit(
     x=X_train,
     y=y_train,
-    epochs=10,
+    epochs=NUMBER_OF_EPOCHS,
     validation_data=(X_val, y_val),
 )
 # %%
