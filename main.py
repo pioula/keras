@@ -46,7 +46,7 @@ good_labels = zipped.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), x[1]))
 encoded_shift = cycle_shift(encoded)
 zipped_bad = tf.data.Dataset.zip((input, encoded_shift))
 bad_labels = zipped_bad.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), y[1]))
-X = good_labels.concatenate(bad_labels).map(lambda x, y: (x / 255., y))
+X = good_labels.concatenate(bad_labels).map(lambda x, y: (x / 255., y)).shuffle(buffer_size=10000)
 print("transformed")
 #%%
 import tensorflow as tf
@@ -64,7 +64,7 @@ with tf.device('/device:GPU:0'):
     print("fitting")
     # Fit the model to the data
 
-    model.fit(X, epochs=NUMBER_OF_EPOCHS, validation_split=0.2, batch_size=64)
+    model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=64)
 
     # model.fit(
     #     X, epochs=10
