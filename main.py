@@ -64,7 +64,7 @@ with tf.device('/device:GPU:0'):
     print("fitting")
     # Fit the model to the data
 
-    model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=1)
+    model.fit(X, epochs=NUMBER_OF_EPOCHS, validation_split=0.2, batch_size=64)
 
     # model.fit(
     #     X, epochs=10
