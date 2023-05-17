@@ -25,37 +25,24 @@ import tensorflow as tf
 from tensorflow import keras
 
 input = keras.utils.image_dataset_from_directory(
-    directory=f'{base_path}BigDataCup2022/S1/train/input',
-    labels=None,
-    label_mode=None,
+    directory=f'{base_path}BigDataCup2022/S1/train',
+    labels="inferred",
     image_size=(512,512),
-    shuffle=False
+    shuffle=False,
+    batch_size=100
     )
-#%%
-encoded = keras.utils.image_dataset_from_directory(
-    directory=f'{base_path}BigDataCup2022/S1/train/enc',
-    labels=None,
-    label_mode=None,
-    image_size=(512,512),
-    shuffle=False
-)
+encoded = input.skip(10000//100)
+input = input.take(10000//100)
+print("loaded")
 #%%
 zipped = tf.data.Dataset.zip((input, encoded))
-good_labels = zipped.map(lambda x, y: (tf.concat((x, y), axis=3), [1]))
+good_labels = zipped.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), x[1]))
 
 encoded_shift = cycle_shift(encoded)
 zipped_bad = tf.data.Dataset.zip((input, encoded_shift))
-bad_labels = zipped_bad.map(lambda x, y: (tf.concat((x, y), axis=3), [0]))
+bad_labels = zipped_bad.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), y[1]))
 X = good_labels.concatenate(bad_labels).map(lambda x, y: (x / 255., y))
-#%%
-def add_labels(image, label):
-    # Your custom label logic here
-    return image, tf.expand_dims(label, axis=-1)
-
-dataset = X
-
-new_dataset = dataset.map(lambda x, y: add_labels(x, y))
-new_dataset
+print("transformed")
 #%%
 import tensorflow as tf
 from tensorflow import keras
