@@ -1,5 +1,5 @@
 #%%
-NUMBER_OF_IMAGES = 10000
+NUMBER_OF_IMAGES = 200
 base_path = './'
 #%%
 import argparse
@@ -31,8 +31,8 @@ input = keras.utils.image_dataset_from_directory(
     shuffle=False,
     batch_size=100
     )
-encoded = input.skip(10000//100)
-input = input.take(10000//100)
+encoded = input.skip(NUMBER_OF_IMAGES//100)
+input = input.take(NUMBER_OF_IMAGES//100)
 print("loaded")
 #%%
 zipped = tf.data.Dataset.zip((input, encoded))
