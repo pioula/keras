@@ -9,7 +9,6 @@ parser.add_argument('--path', type=str, help='an argument')
 parser.add_argument('--ep', type=int, help='an argument')
 args = parser.parse_args()
 
-NUMBER_OF_IMAGES = args.img
 NUMBER_OF_EPOCHS = args.ep
 
 base_path = args.path
@@ -73,7 +72,7 @@ with tf.device('/device:GPU:0'):
     print("fitting")
     # Fit the model to the data
 
-    model.fit(X, epochs=5)
+    model.fit(X, epochs=NUMBER_OF_EPOCHS)
 
     # model.fit(
     #     X, epochs=10
