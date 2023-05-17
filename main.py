@@ -65,18 +65,24 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 
-with tf.device('/device:GPU:0'):
+try:
+    tpu = tf.distribute.cluster_resolver.TPUClusterResolver.connect()
+    print("Device:", tpu.master())
+    strategy = tf.distribute.TPUStrategy(tpu)
+except ValueError:
+    print("Not connected to a TPU runtime. Using CPU/GPU strategy")
+    strategy = tf.distribute.MirroredStrategy()
+
+with strategy.scope(): 
     model = tf.keras.Sequential()
     model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 3)))
     model.add(tf.keras.layers.GlobalAveragePooling2D())
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
-    # Compile the model
     model.compile(optimizer=keras.optimizers.Adam(), loss="binary_crossentropy", metrics=["accuracy"])
-    print("fitting")
-    # Fit the model to the data
 
-    model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=2)
+print("fitting")
+model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=2)
 # %%
 
     # # Data augmentation
