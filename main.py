@@ -65,7 +65,7 @@ with tf.device('/device:GPU:0'):
     print("fitting")
     # Fit the model to the data
 
-    model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=10)
+    model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=10, workers=50)
 # %%
 
     # # Data augmentation
