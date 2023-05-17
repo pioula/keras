@@ -1,5 +1,6 @@
 #%%
 NUMBER_OF_IMAGES = 10000
+BATCH_SIZE = 10
 base_path = './'
 #%%
 import argparse
@@ -33,10 +34,10 @@ input = keras.utils.image_dataset_from_directory(
     labels="inferred",
     image_size=(512,512),
     shuffle=False,
-    batch_size=100
+    batch_size=BATCH_SIZE
     )
-encoded = input.skip(NUMBER_OF_IMAGES//100)
-input = input.take(NUMBER_OF_IMAGES//100)
+encoded = input.skip(NUMBER_OF_IMAGES//BATCH_SIZE)
+input = input.take(NUMBER_OF_IMAGES//BATCH_SIZE)
 print("loaded")
 #%%
 zipped = tf.data.Dataset.zip((input, encoded))
@@ -63,7 +64,7 @@ with tf.device('/device:GPU:0'):
     print("fitting")
     # Fit the model to the data
 
-    model.fit(X, epochs=NUMBER_OF_EPOCHS)
+    model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=1)
 
     # model.fit(
     #     X, epochs=10
