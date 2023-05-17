@@ -23,7 +23,7 @@ def cycle_shift(ds):
     dataset1 = dataset0.filter(lambda x, _: x == 0)
     dataset2 = dataset0.filter(lambda x, _: x != 0)
     dataset3 = dataset2.concatenate(dataset1)
-    dataset4 = dataset3.map(lambda _, y: y)
+    dataset4 = dataset3.map(lambda _, y: y, num_parallel_calls=tf.data.AUTOTUNE)
     return dataset4
 #%%
 import tensorflow as tf
@@ -41,12 +41,12 @@ input = input.take(NUMBER_OF_IMAGES//BATCH_SIZE)
 print("loaded")
 #%%
 zipped = tf.data.Dataset.zip((input, encoded))
-good_labels = zipped.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), x[1]))
+good_labels = zipped.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), x[1]), num_parallel_calls=tf.data.AUTOTUNE)
 
 encoded_shift = cycle_shift(encoded)
 zipped_bad = tf.data.Dataset.zip((input, encoded_shift))
-bad_labels = zipped_bad.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), y[1]))
-X = good_labels.concatenate(bad_labels).map(lambda x, y: (x / 255., y)).shuffle(buffer_size=10)
+bad_labels = zipped_bad.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), y[1]), num_parallel_calls=tf.data.AUTOTUNE)
+X = good_labels.concatenate(bad_labels).map(lambda x, y: (x / 255., y), num_parallel_calls=tf.data.AUTOTUNE).shuffle(buffer_size=10)
 print("transformed")
 #%%
 import tensorflow as tf
@@ -64,20 +64,7 @@ with tf.device('/device:GPU:0'):
     print("fitting")
     # Fit the model to the data
 
-    model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=10)
-
-    # model.fit(
-    #     X, epochs=10
-    # )
-
-    # predictions = model.predict(X_val)
-    # print(predictions)
-
-    # # round predictions
-    # predictions = np.round(predictions)
-
-    # accuracy = tf.keras.metrics.Accuracy()
-    # print(accuracy(predictions, y_val))
+    model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=2)
 # %%
 
     # # Data augmentation
