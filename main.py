@@ -1,7 +1,7 @@
 #%%
 NUMBER_OF_IMAGES = 10000
 BATCH_SIZE = 10
-base_path = './'
+base_path = './X/'
 #%%
 import argparse
 
@@ -51,10 +51,8 @@ zipped_bad = tf.data.Dataset.zip((input, encoded_shift))
 bad_labels = zipped_bad.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), y[1]), num_parallel_calls=tf.data.AUTOTUNE)
 
 X = good_labels.concatenate(bad_labels).map(lambda x, y: (x / 255., y), num_parallel_calls=tf.data.AUTOTUNE)
-X = X.shuffle(buffer_size=2000)
+X = X.shuffle(buffer_size=(NUMBER_OF_IMAGES//BATCH_SIZE) * 2)
 X = X.prefetch(buffer_size=tf.data.AUTOTUNE)
-
-print("transformed")
 #%%
 import tensorflow as tf
 from tensorflow import keras
