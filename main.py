@@ -20,6 +20,7 @@ base_path = args.path
 
 
 #%%
+import random
 def cycle_shift(ds):
     dataset0 = ds.enumerate()
     dataset1 = dataset0.filter(lambda x, _: x == 0)
@@ -27,6 +28,11 @@ def cycle_shift(ds):
     dataset3 = dataset2.concatenate(dataset1)
     dataset4 = dataset3.map(lambda _, y: y, num_parallel_calls=tf.data.AUTOTUNE)
     return dataset4
+
+def generator():
+    random.seed(42)
+    for _ in range(2000):
+        yield random.choice([True, False])
 
 #%%
 import tensorflow as tf
@@ -50,8 +56,11 @@ encoded_shift = cycle_shift(encoded)
 zipped_bad = tf.data.Dataset.zip((input, encoded_shift))
 bad_labels = zipped_bad.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), y[1]), num_parallel_calls=tf.data.AUTOTUNE)
 
-X = good_labels.concatenate(bad_labels).map(lambda x, y: (x / 255., y), num_parallel_calls=tf.data.AUTOTUNE)
-X = X.shuffle(buffer_size=(NUMBER_OF_IMAGES//BATCH_SIZE) * 2)
+good_bad_zipped = tf.data.Dataset.zip((good_labels, bad_labels, tf.data.Dataset.from_generator(generator, output_types=tf.bool)))
+shuffle_part1 = good_bad_zipped.map(lambda x, y, z: x if z else y)
+shuffle_part2 = good_bad_zipped.map(lambda x, y, z: x if not z else y)
+
+X = shuffle_part1.concatenate(shuffle_part2).map(lambda x, y: (x / 255., y), num_parallel_calls=tf.data.AUTOTUNE)
 X = X.prefetch(buffer_size=tf.data.AUTOTUNE)
 #%%
 import tensorflow as tf
