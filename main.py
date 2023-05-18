@@ -34,6 +34,18 @@ def generator():
     for _ in range(2000):
         yield random.choice([True, False])
 
+
+def train_val_split(ds, dataset_size, val_fraction):
+
+    # Calculate the number of elements in the validation set
+    val_size = int(dataset_size * val_fraction)
+
+    # Split the dataset into training and validation sets
+    train_dataset = ds.skip(val_size)
+    val_dataset = ds.take(val_size)
+
+    return train_dataset, val_dataset
+
 #%%
 import tensorflow as tf
 from tensorflow import keras
@@ -62,6 +74,8 @@ shuffle_part2 = good_bad_zipped.map(lambda x, y, z: x if not z else y)
 
 X = shuffle_part1.concatenate(shuffle_part2).map(lambda x, y: (x / 255., y), num_parallel_calls=tf.data.AUTOTUNE)
 X = X.prefetch(buffer_size=tf.data.AUTOTUNE)
+X_train, X_val = train_val_split(X, NUMBER_OF_IMAGES * 2, 0.2)
+
 #%%
 import tensorflow as tf
 from tensorflow import keras
@@ -76,8 +90,10 @@ with tf.device('/device:GPU:0'):
     model.compile(optimizer=keras.optimizers.Adam(), loss="binary_crossentropy", metrics=["accuracy"])
 
     print("fitting")
-    model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=2, steps_per_epoch = 10)
-
+    model.fit(X_train, epochs=NUMBER_OF_EPOCHS, batch_size=2, steps_per_epoch = 10)
+    print("predicting")
+    predictions = model.predict(X_val)
+    print(predictions)
 
 # %%
 
