@@ -86,7 +86,7 @@ with tf.device('/device:GPU:0'):
     model.add(tf.keras.layers.GlobalAveragePooling2D())
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
-    model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.00001), loss="binary_crossentropy", metrics=["accuracy"])
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001), loss="binary_crossentropy", metrics=["accuracy"])
 
     print("fitting")
     model.fit(X_train, epochs=NUMBER_OF_EPOCHS, batch_size=2)
