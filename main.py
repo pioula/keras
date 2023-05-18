@@ -79,6 +79,7 @@ X_train, X_val = train_val_split(X, (NUMBER_OF_IMAGES//BATCH_SIZE) * 2, 0.2)
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
+import os
 
 tf.keras.backend.clear_session()
 
