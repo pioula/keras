@@ -81,24 +81,24 @@ from tensorflow import keras
 from keras import layers
 import os
 
-tf.keras.backend.clear_session()
+try:
+  tpu = tf.distribute.cluster_resolver.TPUClusterResolver()  # TPU detection
+  print('Running on TPU ', tpu.cluster_spec().as_dict()['worker'])
+except ValueError:
+  raise BaseException('ERROR: Not connected to a TPU runtime; please see the previous cell in this notebook for instructions!')
 
-resolver = tf.distribute.cluster_resolver.TPUClusterResolver('grpc://' + os.environ['COLAB_TPU_ADDR'])
-tf.config.experimental_connect_to_cluster(resolver)
+tf.config.experimental_connect_to_cluster(tpu)
+tf.tpu.experimental.initialize_tpu_system(tpu)
+tpu_strategy = tf.distribute.TPUStrategy(tpu)
 
-# This is the TPU initialization code that has to be at the beginning.
-tf.tpu.experimental.initialize_tpu_system(resolver)
-print("All devices: ", tf.config.list_logical_devices('TPU'))
-
-strategy = tf.distribute.experimental.TPUStrategy(resolver)
-
-with strategy.scope():
+with tpu_strategy.scope():
     model = tf.keras.Sequential()
     model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 6)))
     model.add(tf.keras.layers.GlobalAveragePooling2D())
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001), loss="binary_crossentropy", metrics=["accuracy"])
 
+print(model.summary())
 model.fit(X_train, epochs=NUMBER_OF_EPOCHS, batch_size=2)
 
 print("predicting")
