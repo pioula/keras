@@ -1,5 +1,5 @@
 #%%
-NUMBER_OF_IMAGES = 10000
+NUMBER_OF_IMAGES = 50
 BATCH_SIZE = 10
 base_path = './X/'
 #%%
@@ -74,8 +74,7 @@ shuffle_part2 = good_bad_zipped.map(lambda x, y, z: x if not z else y)
 
 X = shuffle_part1.concatenate(shuffle_part2).map(lambda x, y: (x / 255., y), num_parallel_calls=tf.data.AUTOTUNE)
 X = X.prefetch(buffer_size=tf.data.AUTOTUNE)
-X_train, X_val = train_val_split(X, NUMBER_OF_IMAGES * 2, 0.2)
-
+X_train, X_val = train_val_split(X, (NUMBER_OF_IMAGES//BATCH_SIZE) * 2, 0.2)
 #%%
 import tensorflow as tf
 from tensorflow import keras
