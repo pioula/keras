@@ -1,5 +1,5 @@
 #%%
-NUMBER_OF_IMAGES = 50
+NUMBER_OF_IMAGES = 10000
 BATCH_SIZE = 10
 base_path = './X/'
 #%%
