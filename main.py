@@ -91,7 +91,7 @@ with tf.device('/device:GPU:0'):
     print("fitting")
     model.fit(X_train, epochs=NUMBER_OF_EPOCHS, batch_size=2, steps_per_epoch=10)
     print("predicting")
-    model.evaluate(X_val)
+    print(model.evaluate(X_val))
 
 # %%
 
