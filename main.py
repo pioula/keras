@@ -89,7 +89,7 @@ with tf.device('/device:GPU:0'):
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001), loss="binary_crossentropy", metrics=["accuracy"])
 
     print("fitting")
-    model.fit(X_train, epochs=NUMBER_OF_EPOCHS, batch_size=2)
+    model.fit(X_train, epochs=NUMBER_OF_EPOCHS, batch_size=2, steps_per_epoch=200)
     print("predicting")
     print(model.evaluate(X_val))
 
