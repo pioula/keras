@@ -80,18 +80,42 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 
-with tf.device('/device:GPU:0'):
+tf.keras.backend.clear_session()
+
+resolver = tf.distribute.cluster_resolver.TPUClusterResolver('grpc://' + os.environ['COLAB_TPU_ADDR'])
+tf.config.experimental_connect_to_cluster(resolver)
+
+# This is the TPU initialization code that has to be at the beginning.
+tf.tpu.experimental.initialize_tpu_system(resolver)
+print("All devices: ", tf.config.list_logical_devices('TPU'))
+
+strategy = tf.distribute.experimental.TPUStrategy(resolver)
+
+with strategy.scope():
     model = tf.keras.Sequential()
     model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 6)))
     model.add(tf.keras.layers.GlobalAveragePooling2D())
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
-
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001), loss="binary_crossentropy", metrics=["accuracy"])
 
-    print("fitting")
-    model.fit(X_train, epochs=NUMBER_OF_EPOCHS, batch_size=2)
-    print("predicting")
-    print(model.evaluate(X_val))
+model.fit(X_train, epochs=NUMBER_OF_EPOCHS, batch_size=2)
+
+print("predicting")
+print(model.evaluate(X_val))
+model.save_weights('./fashion_mnist.h5', overwrite=True)
+
+# with tf.device('/device:GPU:0'):
+    # model = tf.keras.Sequential()
+    # model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 6)))
+    # model.add(tf.keras.layers.GlobalAveragePooling2D())
+    # model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+
+#     model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001), loss="binary_crossentropy", metrics=["accuracy"])
+
+#     print("fitting")
+#     model.fit(X_train, epochs=NUMBER_OF_EPOCHS, batch_size=2)
+#     print("predicting")
+#     print(model.evaluate(X_val))
 
 # %%
 
