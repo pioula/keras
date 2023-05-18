@@ -12,10 +12,10 @@ args = parser.parse_args()
 
 NUMBER_OF_EPOCHS = args.ep
 import tensorflow as tf
-# device_name = tf.test.gpu_device_name()
-# if device_name != '/device:GPU:0':
-#   raise SystemError('GPU device not found')
-# print('Found GPU at: {}'.format(device_name))
+device_name = tf.test.gpu_device_name()
+if device_name != '/device:GPU:0':
+  raise SystemError('GPU device not found')
+print('Found GPU at: {}'.format(device_name))
 base_path = args.path
 
 
@@ -32,57 +32,45 @@ def cycle_shift(ds):
 import tensorflow as tf
 from tensorflow import keras
 
-# input = keras.utils.image_dataset_from_directory(
-#     directory=f'{base_path}BigDataCup2022/S1/train',
-#     labels="inferred",
-#     image_size=(512,512),
-#     shuffle=False,
-#     batch_size=BATCH_SIZE
-#     )
-# encoded = input.skip(NUMBER_OF_IMAGES//BATCH_SIZE) # 1 shape = ((1000, 10, 512, 512, 3), (1000, 10, ))
-# input = input.take(NUMBER_OF_IMAGES//BATCH_SIZE) # 0 (1000, 10, 512, 512, 3)
-# print("loaded")
-# #%%
-# zipped = tf.data.Dataset.zip((input, encoded))
-# good_labels = zipped.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), x[1]), num_parallel_calls=tf.data.AUTOTUNE)
-
-# encoded_shift = cycle_shift(encoded)
-# zipped_bad = tf.data.Dataset.zip((input, encoded_shift))
-# bad_labels = zipped_bad.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), y[1]), num_parallel_calls=tf.data.AUTOTUNE)
-X = keras.utils.image_dataset_from_directory(
+input = keras.utils.image_dataset_from_directory(
     directory=f'{base_path}BigDataCup2022/S1/train',
     labels="inferred",
     image_size=(512,512),
-    shuffle=True,
+    shuffle=False,
     batch_size=BATCH_SIZE
-)
-# X = good_labels.concatenate(bad_labels).map(lambda x, y: (x / 255., y), num_parallel_calls=tf.data.AUTOTUNE).shuffle(buffer_size=10)
-# X = X.prefetch(buffer_size=tf.data.AUTOTUNE)
+    )
+encoded = input.skip(NUMBER_OF_IMAGES//BATCH_SIZE) # 1 shape = ((1000, 10, 512, 512, 3), (1000, 10, ))
+input = input.take(NUMBER_OF_IMAGES//BATCH_SIZE) # 0 (1000, 10, 512, 512, 3)
+print("loaded")
+#%%
+zipped = tf.data.Dataset.zip((input, encoded))
+good_labels = zipped.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), x[1]), num_parallel_calls=tf.data.AUTOTUNE)
+
+encoded_shift = cycle_shift(encoded)
+zipped_bad = tf.data.Dataset.zip((input, encoded_shift))
+bad_labels = zipped_bad.map(lambda x, y: ((tf.concat((x[0], y[0]), axis=3)), y[1]), num_parallel_calls=tf.data.AUTOTUNE)
+
+X = good_labels.concatenate(bad_labels).map(lambda x, y: (x / 255., y), num_parallel_calls=tf.data.AUTOTUNE).shuffle(buffer_size=10)
 X = X.prefetch(buffer_size=tf.data.AUTOTUNE)
+
 print("transformed")
 #%%
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 
-try:
-    tpu = tf.distribute.cluster_resolver.TPUClusterResolver.connect()
-    print("Device:", tpu.master())
-    strategy = tf.distribute.TPUStrategy(tpu)
-except ValueError:
-    print("Not connected to a TPU runtime. Using CPU/GPU strategy")
-    strategy = tf.distribute.MirroredStrategy()
-
-with strategy.scope(): 
+with tf.device('/device:GPU:0'):
     model = tf.keras.Sequential()
-    model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 3)))
+    model.add(keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(512, 512, 6)))
     model.add(tf.keras.layers.GlobalAveragePooling2D())
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
     model.compile(optimizer=keras.optimizers.Adam(), loss="binary_crossentropy", metrics=["accuracy"])
 
-print("fitting")
-model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=2)
+    print("fitting")
+    model.fit(X, epochs=NUMBER_OF_EPOCHS, batch_size=10, steps_per_epoch = 10)
+    
+
 # %%
 
     # # Data augmentation
